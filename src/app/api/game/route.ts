@@ -24,7 +24,7 @@ export async function POST(req: Request, res: Response) {
                 timeStarted: new Date(),
                 userId: session.user.id,
                 topic,
-                timeEnded: null, // so we can tell if the user completed the quiz or not
+                timeEnded: null,
             },
         });
 
