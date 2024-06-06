@@ -31,9 +31,9 @@ const QuizCreation = (props: Props) => {
   const form = useForm<Input>({
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
-      amount: 3,
+      amount: 5,
       topic: "",
-      type: "open_ended",
+      type: "mcq",
     },
   });
   const onSubmit = (input: Input) => {
@@ -42,10 +42,10 @@ const QuizCreation = (props: Props) => {
   form.watch();
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-      <Card>
+      <Card className="dark:bg-gray-800 dark:shadow-lg dark:shadow-purple-500/60 dark:border dark:border-purple-500">
         <CardHeader>
-          <CardTitle className="font-bold text-2xl">Quiz Creation</CardTitle>
-          <CardDescription>Choose a topic</CardDescription>
+          <CardTitle className="font-bold text-2xl text-center">Quiz Creation</CardTitle>
+          <CardDescription className="text-center" >Choose a topic</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -82,12 +82,12 @@ const QuizCreation = (props: Props) => {
                         }}
                       />
                     </FormControl>
-                    <FormDescription>Please provide a topic.</FormDescription>
+                    <FormDescription>Please select number of questions.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-2">
                 <Button
                   type="button"
                   onClick={() => {
