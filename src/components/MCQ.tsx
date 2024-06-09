@@ -1,39 +1,43 @@
 "use client";
 import React from "react";
 import { Game, Question } from "@prisma/client";
-import { Timer, Slash, ChevronRight, Loader2 } from "lucide-react";
+import { Timer, Slash, ChevronRight, Loader2, BarChart2 } from "lucide-react";
 import MCQCounter from "@/components/MCQCounter";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { useMutation } from "@tanstack/react-query";
 import { checkAnswerSchema } from "@/schemas/forms/quiz";
 import { z } from "zod";
 import axios from "axios";
 import { useToast } from "./ui/use-toast";
-
+import Link from "next/link";
+import { differenceInSeconds } from "date-fns";
+import { cn, formatTime } from "@/lib/utils";
 type Props = {
   game: Game & { questions: Pick<Question, "id" | "options" | "question">[] };
 };
 
 const MCQ = ({ game }: Props) => {
-  const [questionIndex, setQuestionIndex] = React.useState<number>(0);
+  const [questionIndex, setQuestionIndex] = React.useState<number>(19);
   const [selectedChoice, setSelectedChoice] = React.useState<number>(0);
   const [hasEnded, setHasEnded] = React.useState(false);
   const [stats, setStats] = React.useState({
     correct_answers: 0,
     wrong_answers: 0,
   });
+  const [now, setNow] = React.useState(new Date());
   const { toast } = useToast();
+  //getting Question and Answer array
   const currentQuestion = React.useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
-
+  //Extracting options from the Question Array
   const options = React.useMemo(() => {
     if (!currentQuestion) return [];
     if (!currentQuestion.options) return [];
     return JSON.parse(currentQuestion.options as string) as string[];
   }, [currentQuestion]);
-
+  // Passing current selected option to store in the database
   const { mutate: checkAnswer, isPending: isChecking } = useMutation({
     mutationFn: async () => {
       const payload: z.infer<typeof checkAnswerSchema> = {
@@ -45,7 +49,9 @@ const MCQ = ({ game }: Props) => {
       return response.data;
     },
   });
+  // TODO: End game logic
 
+  // Pagination function
   const handlePagination = React.useCallback(() => {
     checkAnswer(undefined, {
       onSuccess: ({ isCorrect }) => {
@@ -70,14 +76,15 @@ const MCQ = ({ game }: Props) => {
             variant: "destructive",
           });
         }
-        if(questionIndex === game.questions.length-1) {
+        if (questionIndex === game.questions.length - 1) {
+          //End the game
           setHasEnded(true);
           return;
         }
         setQuestionIndex((prev) => prev + 1);
       },
     });
-  }, [checkAnswer, questionIndex , game.questions.length, toast]);
+  }, [checkAnswer, questionIndex, game.questions.length, toast]);
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -103,9 +110,23 @@ const MCQ = ({ game }: Props) => {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [handlePagination]);
-
+  // IF game is ended redirect to the statistics page
   if (hasEnded) {
-    //TODO
+    return (
+      <div className="absolute flex flex-col justify-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
+        <div className="px-4 py-2 mt-2 font-semibold text-white dark:text-gray-600 bg-orange-400 rounded-md whitespace-nowrap">
+          You have Completed the Quiz in{" "}
+          {formatTime(differenceInSeconds(now, game.timeStarted))}
+        </div>
+        <Link
+          href={`/statistics/${game.id}`}
+          className={cn(buttonVariants({ size: "lg" }), "mt-2")}
+        >
+          View Statistics
+          <BarChart2 className="w-4 h-4 ml-2" />
+        </Link>
+      </div>
+    );
   }
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 md:w-[80vw] max-w-4xl w-[90vw] top-1/2 left-1/2">
