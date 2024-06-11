@@ -1,60 +1,39 @@
 "use client";
-import React from "react";
 import { Game, Question } from "@prisma/client";
-import { Timer, Slash, ChevronRight, Loader2, BarChart2 } from "lucide-react";
-import MCQCounter from "@/components/MCQCounter";
-import { Button, buttonVariants } from "./ui/button";
-import { Card, CardHeader, CardTitle, CardDescription } from "./ui/card";
-import { useMutation } from "@tanstack/react-query";
-import { checkAnswerSchema } from "@/schemas/forms/quiz";
-import { z } from "zod";
-import axios from "axios";
+import React from "react";
 import { useToast } from "./ui/use-toast";
-import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
 import { differenceInSeconds } from "date-fns";
+import { z } from "zod";
+import { checkAnswerSchema } from "@/schemas/forms/quiz";
+import axios from "axios";
+import { BarChart2, ChevronRight, Loader2, Slash, Timer } from "lucide-react";
+import { Button, buttonVariants } from "./ui/button";
 import { cn, formatTime } from "@/lib/utils";
+import Link from "next/link";
+import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
+import OpenEndedPercentage from "./OpenEndedPercentage";
+import BlankAnswer from "./BlankAnswerInput";
 
 type Props = {
-  game: Game & { questions: Pick<Question, "id" | "options" | "question">[] };
+  game: Game & { questions: Pick<Question, "id" | "question" | "answer">[] };
 };
 
-const MCQ = ({ game }: Props) => {
-  const [questionIndex, setQuestionIndex] = React.useState<number>(0);
-  const [selectedChoice, setSelectedChoice] = React.useState<number>(0);
+const OpenEnded = ({ game }: Props) => {
   const [hasEnded, setHasEnded] = React.useState(false);
-  const [stats, setStats] = React.useState({
-    correct_answers: 0,
-    wrong_answers: 0,
-  });
-  const [now, setNow] = React.useState(new Date());
+  const [questionIndex, setQuestionIndex] = React.useState(0);
+  const [blankAnswer, setBlankAnswer] = React.useState("");
+  const [averagePercentage, setAveragePercentage] = React.useState(0);
   const { toast } = useToast();
+  const [now, setNow] = React.useState(new Date());
+  const [mounted, setMounted] = React.useState(false);
 
   //getting Question and Answer array
   const currentQuestion = React.useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
 
-  //Extracting options from the Question Array
-  const options = React.useMemo(() => {
-    if (!currentQuestion) return [];
-    if (!currentQuestion.options) return [];
-    return JSON.parse(currentQuestion.options as string) as string[];
-  }, [currentQuestion]);
-
-  // Passing current selected option to store in the database
-  const { mutate: checkAnswer, isPending: isChecking } = useMutation({
-    mutationFn: async () => {
-      const payload: z.infer<typeof checkAnswerSchema> = {
-        questionId: currentQuestion.id,
-        userInput: options[selectedChoice],
-      };
-      const response = await axios.post(`/api/checkAnswer`, payload);
-      //console.log(response.data);
-      return response.data;
-    },
-  });
-
-  // Update Timer 
+  // Update Timer
   React.useEffect(() => {
     const interval = setInterval(() => {
       if (!hasEnded) {
@@ -63,40 +42,39 @@ const MCQ = ({ game }: Props) => {
     }, 1000);
     return () => clearInterval(interval);
   }, [hasEnded]);
-  // Clock timer
-  const formatElapsedTime = (startTime: Date, currentTime: Date) => {
-    const seconds = differenceInSeconds(currentTime, startTime);
-    const hrs = Math.floor(seconds / 3600);
-    const mins = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  //  Passing current filled answer to store in the database
+  const { mutate: checkAnswer, isPending: isChecking } = useMutation({
+    mutationFn: async () => {
+      let filledAnswer = blankAnswer;
+      document.querySelectorAll<HTMLInputElement>("#user-blank-input").forEach((input) => {
+        filledAnswer = filledAnswer.replace("_____", input.value);
+        input.value  = "";
+      });
+      console.log(filledAnswer);
+      const payload: z.infer<typeof checkAnswerSchema> = {
+        questionId: currentQuestion.id,
+        userInput: filledAnswer,
+      };
+      const response = await axios.post("/api/checkAnswer", payload);
+      return response.data;
+    },
+  });
 
   // Pagination function
   const handlePagination = React.useCallback(() => {
     checkAnswer(undefined, {
-      onSuccess: ({ isCorrect }) => {
-        if (isCorrect) {
-          setStats((stats) => ({
-            ...stats,
-            correct_answers: stats.correct_answers + 1,
-          }));
-          toast({
-            variant: "success",
-            title: "Correct",
-            description: "You got it right!",
-          });
-        } else {
-          setStats((stats) => ({
-            ...stats,
-            wrong_answers: stats.wrong_answers + 1,
-          }));
-          toast({
-            title: "Incorrect",
-            description: "You got it wrong!",
-            variant: "destructive",
-          });
-        }
+      onSuccess: ({ percentageSimilar }) => {
+        toast({
+          title: `Your answer is ${percentageSimilar}% similar to the correct answer`,
+        });
+        setAveragePercentage((prev) => {
+          return (prev + percentageSimilar) / (questionIndex + 1);
+        });
         if (questionIndex === game.questions.length - 1) {
           //End the game
           setHasEnded(true);
@@ -104,29 +82,33 @@ const MCQ = ({ game }: Props) => {
         }
         setQuestionIndex((prev) => prev + 1);
       },
+      onError: (error) => {
+        console.error(error);
+        toast({
+          title: "Something went wrong",
+          variant: "destructive",
+        });
+      },
     });
   }, [checkAnswer, questionIndex, game.questions.length, toast]);
 
+  const formatElapsedTime = (startTime: Date, currentTime: Date) => {
+    const seconds = differenceInSeconds(currentTime, startTime);
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key;
-      //console.log("Key down event:", key);
-
-      if (key === "1") {
-        setSelectedChoice(0);
-      } else if (key === "2") {
-        setSelectedChoice(1);
-      } else if (key === "3") {
-        setSelectedChoice(2);
-      } else if (key === "4") {
-        setSelectedChoice(3);
-      } else if (key === "Enter") {
+      if (key === "Enter") {
         handlePagination();
       }
     };
-
     document.addEventListener("keydown", handleKeyDown);
-
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
@@ -167,13 +149,10 @@ const MCQ = ({ game }: Props) => {
         </div>
         <div className="flex self-start mt-3 text-slate-700 dark:text-zinc-300 font-semibold">
           <Timer className="mr-2 font-bold" />
-          {formatElapsedTime(game.timeStarted, now)}
+          {mounted && formatElapsedTime(game.timeStarted, now)}
         </div>
         <div>
-          <MCQCounter
-            correct_answers={stats.correct_answers}
-            wrong_answers={stats.wrong_answers}
-          />
+          <OpenEndedPercentage percentage={averagePercentage} />
         </div>
       </div>
       <Card className="w-full mt-4">
@@ -193,23 +172,11 @@ const MCQ = ({ game }: Props) => {
         </CardHeader>
       </Card>
       <div className="flex flex-col items-center justify-center w-full mt-4">
-        {options.map((option, index) => {
-          return (
-            <Button
-              key={option}
-              variant={selectedChoice === index ? "default" : "secondary"}
-              className="justify-start w-full py-8 mb-4"
-              onClick={() => setSelectedChoice(index)}
-            >
-              <div className="flex items-center justify-start">
-                <div className="p-2 px-3 mr-5 border rounded-md">
-                  {index + 1}
-                </div>
-                <div className="text-start">{option}</div>
-              </div>
-            </Button>
-          );
-        })}
+        {/* BlankAnwer Input */}
+        <BlankAnswer
+          setBlankAnswer={setBlankAnswer}
+          answer={currentQuestion.answer}
+        />
         <Button
           variant="default"
           className="mt-8 text-lg"
@@ -227,4 +194,4 @@ const MCQ = ({ game }: Props) => {
   );
 };
 
-export default MCQ;
+export default OpenEnded;
