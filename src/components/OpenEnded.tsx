@@ -13,7 +13,7 @@ import { cn, formatTime } from "@/lib/utils";
 import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import OpenEndedPercentage from "./OpenEndedPercentage";
-import BlankAnswer from "./BlankAnswerInput";
+import BlankAnswerInput from "./BlankAnswerInput";
 
 type Props = {
   game: Game & { questions: Pick<Question, "id" | "question" | "answer">[] };
@@ -173,7 +173,7 @@ const OpenEnded = ({ game }: Props) => {
       </Card>
       <div className="flex flex-col items-center justify-center w-full mt-4">
         {/* BlankAnwer Input */}
-        <BlankAnswer
+        <BlankAnswerInput
           setBlankAnswer={setBlankAnswer}
           answer={currentQuestion.answer}
         />
