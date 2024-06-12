@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import React from "react";
 import LoadingQuestions from "./LoadingQuestions";
+import { useToast } from "./ui/use-toast";
 
 type Input = z.infer<typeof quizCreationSchema>;
 
@@ -34,6 +35,7 @@ type Props = {};
 
 const QuizCreation = (props: Props) => {
   const router = useRouter();
+  const { toast } = useToast();
   const [showLoader, setShowLoader] = React.useState(false);
   const [finishedLoading, setFinishedLoading] = React.useState(false);
   const { mutate: getQuestions, isPending } = useMutation({
@@ -45,7 +47,7 @@ const QuizCreation = (props: Props) => {
   const form = useForm<Input>({
     resolver: zodResolver(quizCreationSchema),
     defaultValues: {
-      amount: 5,
+      amount: 3,
       topic: "",
       type: "mcq",
     },
@@ -58,7 +60,11 @@ const QuizCreation = (props: Props) => {
         setShowLoader(false);
         if (error instanceof AxiosError) {
           if (error.response?.status === 500) {
-            //TODO: show toast message
+            toast({
+              title: "Error",
+              description: "Something went wrong. Please try again later.",
+              variant: "destructive",
+            });
           }
         }
       },
@@ -89,7 +95,7 @@ const QuizCreation = (props: Props) => {
             Quiz Creation
           </CardTitle>
           <CardDescription className="text-center">
-            Choose a topic
+            Choose any topic
           </CardDescription>
         </CardHeader>
         <CardContent>

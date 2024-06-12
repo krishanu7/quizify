@@ -18,12 +18,8 @@ export async function POST(req: Request, res: Response) {
         let allQuestions: any[] = [];
         // Create prompts based on the requested amount in batches
         for (let i = 0; i < amount; i += chunkSize) {
-            const prompts: string[] = [];
             // Generate prompts for the current batch
             for (let j = i; j < Math.min(i + chunkSize, amount); j++) {
-                prompts.push(
-                    `You are to generate a random hard ${type} question about ${topic}`,
-                );
                 let questionsBatch: any;
                 if (type === 'open_ended') {
                     questionsBatch = await strict_output(

@@ -45,7 +45,6 @@ export async function strict_output(
     if (list_input) {
       output_format_prompt += `\nGenerate a list of json, one json for each input element.`;
     }
-
     const response = await openai.chat.completions.create({
       temperature: temperature,
       model: model,
