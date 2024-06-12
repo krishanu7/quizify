@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import CustomHotTopic from "../CustomHotTopic";
+import CustomHotTopic from "./CustomHotTopic";
 
 const HotTopicsCard = () => {
   return (

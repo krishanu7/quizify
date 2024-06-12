@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Game, Question } from "@prisma/client";
 import { Timer, Slash, ChevronRight, Loader2, BarChart2 } from "lucide-react";
 import MCQCounter from "@/components/MCQCounter";
@@ -28,7 +28,11 @@ const MCQ = ({ game }: Props) => {
   });
   const [now, setNow] = React.useState(new Date());
   const { toast } = useToast();
+  const [mounted, setMounted] = React.useState(false);
 
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
   //getting Question and Answer array
   const currentQuestion = React.useMemo(() => {
     return game.questions[questionIndex];
@@ -167,7 +171,7 @@ const MCQ = ({ game }: Props) => {
         </div>
         <div className="flex self-start mt-3 text-slate-700 dark:text-zinc-300 font-semibold">
           <Timer className="mr-2 font-bold" />
-          {formatElapsedTime(game.timeStarted, now)}
+          {mounted && formatElapsedTime(game.timeStarted, now)}
         </div>
         <div>
           <MCQCounter
