@@ -26,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import axios, { AxiosError } from "axios";
 import React from "react";
+import LoadingQuestions from "./LoadingQuestions";
 
 type Input = z.infer<typeof quizCreationSchema>;
 
@@ -76,6 +77,10 @@ const QuizCreation = (props: Props) => {
   
   form.watch();
 
+  if (showLoader) {
+    return <LoadingQuestions finished={finishedLoading} />;
+  }
+  
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
       <Card className="dark:bg-gray-800 dark:shadow-lg dark:shadow-purple-500/60 dark:border dark:border-purple-500">
