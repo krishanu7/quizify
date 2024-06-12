@@ -37,7 +37,7 @@ const QuestionsList = ({ questions }: Props) => {
           index
         ) => (
           <TableRow key={index} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'}`}>
-            <TableCell className="font-medium p-2 border border-gray-300 dark:border-gray-700">{index + 1}</TableCell>
+            <TableCell className="text-center font-medium p-2 border border-gray-300 dark:border-gray-700">{index + 1}</TableCell>
             <TableCell className="p-2 border border-gray-300 dark:border-gray-700">
               <span className="font-semibold">{question}</span> <br />
               <span className="font-semibold text-blue-700 dark:text-blue-400"><span className="text-black dark:text-white">Ans:</span> {answer}</span>
@@ -50,7 +50,7 @@ const QuestionsList = ({ questions }: Props) => {
               </TableCell>
             )}
             {percentageCorrect && (
-              <TableCell className="text-right p-2 border border-gray-300 dark:border-gray-700">{percentageCorrect}</TableCell>
+              <TableCell className="text-center p-2 border border-gray-300 dark:border-gray-700">{percentageCorrect}</TableCell>
             )}
           </TableRow>
         )
