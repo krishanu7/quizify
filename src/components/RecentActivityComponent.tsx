@@ -8,14 +8,11 @@ type Props = {
   userId: string;
 };
 
-const HistoryComponent = async ({limit, userId}: Props) => {
+const RecentActivityComponent = async ({limit, userId}: Props) => {
   const games = await prisma.game.findMany({
     take: limit,
     where: {
       userId,
-      NOT: {
-        timeEnded: null,
-      }
     },
     orderBy: {
       timeStarted: 'desc',
@@ -37,6 +34,13 @@ const HistoryComponent = async ({limit, userId}: Props) => {
                   className="text-base font-medium leading-none underline"
                   href={`/statistics/${game.id}`}>
                   {game.topic}
+                  {
+                    game.timeEnded!==null ? (
+                        <span className="ml-3 text-muted-foreground">Completed</span>
+                    ) : (
+                        <span className="ml-3 text-muted-foreground">Incompleted</span>
+                    )
+                  }
                 </Link>
                 <p className="flex items-center px-2 py-1 text-xs text-white rounded-lg w-fit bg-slate-800">
                   <Clock className="w-4 h-4 mr-1" />
@@ -54,4 +58,4 @@ const HistoryComponent = async ({limit, userId}: Props) => {
   );
 };
 
-export default HistoryComponent;
+export default RecentActivityComponent;
