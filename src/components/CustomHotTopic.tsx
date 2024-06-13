@@ -1,15 +1,11 @@
-"use client"
-import { useTheme } from "next-themes";
-import dynamic from 'next/dynamic';
-const D3WordCloud = dynamic(() => import('react-d3-cloud'), { ssr: false });
-const data = [
-  { text: "Object Oriented Programing", value: 19 },
-  { text: "Database Management System", value: 20 },
-  { text: "Operating System", value: 14 },
-  { text: "Computer Networks", value: 8 },
-];
+"use client";
+import dynamic from "next/dynamic";
+import { useRouter } from "next/navigation";
+const D3WordCloud = dynamic(() => import("react-d3-cloud"), { ssr: false });
 
-type Props = {};
+type Props = {
+  formattedTopics: { text: string; value: number }[];
+};
 
 const getRandomColor = () => {
   const r = Math.floor(Math.random() * 256);
@@ -21,21 +17,23 @@ const getRandomColor = () => {
 const fontSizeMapper = (word: { value: number }) =>
   Math.log2(word.value) * 5 + 16;
 
-const CustomHotTopic = (props: Props) => {
-  const { theme } = useTheme();
+const CustomHotTopic = ({ formattedTopics }: Props) => {
+  const router = useRouter();
   return (
     <>
       <D3WordCloud
-        data={data}
+        data={formattedTopics}
         height={550}
         font="Times"
         fontSize={fontSizeMapper}
         rotate={0}
         padding={10}
         fill={() => getRandomColor()}
-      ></D3WordCloud>
+        onWordClick={(e, d) => {
+          router.push("/quiz?topic=" + d.text);
+        }}
+      />
     </>
   );
 };
-
 export default CustomHotTopic;
