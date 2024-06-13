@@ -29,7 +29,7 @@ const MCQPage = async ({ params: { gameId } }: Props) => {
       },
     },
   });
-  if(!game || game.gameType === 'open_ended'){
+  if(!game || game.gameType === 'open_ended' || game.timeEnded!==null){
     return redirect("/quiz");
   }
   return <MCQ game={game} />;
