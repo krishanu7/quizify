@@ -6,7 +6,7 @@ import MCQCounter from "@/components/MCQCounter";
 import { Button, buttonVariants } from "./ui/button";
 import { Card, CardHeader, CardTitle, CardDescription } from "./ui/card";
 import { useMutation } from "@tanstack/react-query";
-import { checkAnswerSchema } from "@/schemas/forms/quiz";
+import { checkAnswerSchema, endGameSchema } from "@/schemas/forms/quiz";
 import { z } from "zod";
 import axios from "axios";
 import { useToast } from "./ui/use-toast";
@@ -57,8 +57,17 @@ const MCQ = ({ game }: Props) => {
       return response.data;
     },
   });
-
-  // Update Timer 
+  // Stop timer of the game
+  const { mutate: endGame } = useMutation({
+    mutationFn: async () => {
+      const payload: z.infer<typeof endGameSchema> = {
+        gameId: game.id,
+      };
+      const response = await axios.put(`/api/endGame`, payload);
+      return response.data;
+    },
+  });
+  // Update Timer
   React.useEffect(() => {
     const interval = setInterval(() => {
       if (!hasEnded) {
@@ -73,7 +82,9 @@ const MCQ = ({ game }: Props) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${hrs.toString().padStart(2, "0")}:${mins
+      .toString()
+      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Pagination function
@@ -103,13 +114,14 @@ const MCQ = ({ game }: Props) => {
         }
         if (questionIndex === game.questions.length - 1) {
           //End the game
+          endGame()
           setHasEnded(true);
           return;
         }
         setQuestionIndex((prev) => prev + 1);
       },
     });
-  }, [checkAnswer, questionIndex, game.questions.length, toast]);
+  }, [checkAnswer, questionIndex, game.questions.length, toast, endGame]);
 
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
