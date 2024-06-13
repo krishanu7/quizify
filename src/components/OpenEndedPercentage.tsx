@@ -12,7 +12,7 @@ const OpenEndedPercentage = ({ percentage, questionIndex }: Props) => {
     <Card className="flex flex-row items-center p-2">
       <Target size={30} />
       <span className="ml-3 text-2xl opacity-75">
-        {(percentage / (questionIndex)).toFixed(2)}
+        { questionIndex!==0 ? (percentage / (questionIndex)).toFixed(2) : 0 }
       </span>
       <Percent className="" size={25} />
     </Card>

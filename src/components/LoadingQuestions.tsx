@@ -14,6 +14,7 @@ const loadingTexts = [
 const LoadingQuestions = ({ finished }: Props) => {
   const [progress, setProgress] = React.useState(10);
   const [loadingText, setLoadingText] = React.useState(loadingTexts[0]);
+  //Changing text
   React.useEffect(() => {
     const interval = setInterval(() => {
       let randomIndex = Math.floor(Math.random() * loadingTexts.length);
@@ -21,20 +22,17 @@ const LoadingQuestions = ({ finished }: Props) => {
     }, 2000);
     return () => clearInterval(interval);
   }, []);
+  // For progress bar
   React.useEffect(() => {
-    const interval = setInterval(() => {
+    const progressInterval = setInterval(() => {
       setProgress((prev) => {
         if (finished) return 100;
-        if (prev === 100) {
-          return 0;
-        }
-        if (Math.random() < 0.1) {
-          return prev + 2;
-        }
-        return prev + 0.5;
+        if (prev === 100) return 0;
+        const increment = Math.random() < 0.1 ? 2 : 1;
+        return Math.min(prev + increment, 100);
       });
     }, 100);
-    return () => clearInterval(interval);
+    return () => clearInterval(progressInterval);
   }, [finished]);
   return (
     <div className="absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2  w-[70vw] md:w-[60vw] flex flex-col items-center">

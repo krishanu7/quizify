@@ -12,7 +12,7 @@ export async function POST(req: Request, res: Response) {
         const {amount, topic, type} = quizCreationSchema.parse(body);
         //const { amount, topic, type } = body;
 
-        const chunkSize = 5; 
+        const chunkSize = 7; 
 
         // Create an array to hold all generated questions
         let allQuestions: any[] = [];
@@ -50,6 +50,7 @@ export async function POST(req: Request, res: Response) {
                 allQuestions = allQuestions.concat(questionsBatch);
             }
         }
+        allQuestions = allQuestions.slice(0, amount);
         return NextResponse.json(
             {
                 questions: allQuestions,

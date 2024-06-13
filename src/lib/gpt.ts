@@ -59,7 +59,7 @@ export async function strict_output(
 
     let res: string =
       response.choices[0].message?.content?.replace(/'/g, '"') ?? '';
-    console.log(res);
+    //console.log(res);
     res = res.replace(/(\w)"(\w)/g, "$1'$2");
 
     if (verbose) {
@@ -113,7 +113,7 @@ export async function strict_output(
           }
         }
       }
-      console.log(output);
+      //console.log(output);
       return list_input ? output : output[0];
     } catch (e) {
       error_msg = `\n\nResult: ${res}\n\nError message: ${e}`;

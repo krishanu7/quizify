@@ -14,6 +14,7 @@ import Link from "next/link";
 import { Card, CardDescription, CardHeader, CardTitle } from "./ui/card";
 import OpenEndedPercentage from "./OpenEndedPercentage";
 import BlankAnswerInput from "./BlankAnswerInput";
+import { redirect } from "next/navigation";
 
 type Props = {
   game: Game & { questions: Pick<Question, "id" | "question" | "answer">[] };
@@ -28,11 +29,11 @@ const OpenEnded = ({ game }: Props) => {
   const [now, setNow] = React.useState(new Date());
   const [mounted, setMounted] = React.useState(false);
 
-  //getting Question and Answer array
+  // Getting Question and Answer array
   const currentQuestion = React.useMemo(() => {
     return game.questions[questionIndex];
   }, [questionIndex, game.questions]);
-
+  
   // Update Timer
   React.useEffect(() => {
     const interval = setInterval(() => {
@@ -46,23 +47,25 @@ const OpenEnded = ({ game }: Props) => {
   React.useEffect(() => {
     setMounted(true);
   }, []);
-  //End game logic
-  const {mutate: endGame} = useMutation({
+
+  // End game logic
+  const { mutate: endGame } = useMutation({
     mutationFn: async () => {
-      const payload : z.infer<typeof endGameSchema> = {
+      const payload: z.infer<typeof endGameSchema> = {
         gameId: game.id,
-      }
+      };
       const response = await axios.put(`/api/endGame`, payload);
       return response.data;
-    }
-  })
-  //  Passing current filled answer to store in the database
+    },
+  });
+
+  // Passing current filled answer to store in the database
   const { mutate: checkAnswer, isPending: isChecking } = useMutation({
     mutationFn: async () => {
       let filledAnswer = blankAnswer;
       document.querySelectorAll<HTMLInputElement>("#user-blank-input").forEach((input) => {
         filledAnswer = filledAnswer.replace("_____", input.value);
-        input.value  = "";
+        input.value = "";
       });
       console.log(filledAnswer);
       const payload: z.infer<typeof checkAnswerSchema> = {
@@ -76,6 +79,9 @@ const OpenEnded = ({ game }: Props) => {
 
   // Pagination function
   const handlePagination = React.useCallback(() => {
+    if (hasEnded) {
+      return;
+    }
     checkAnswer(undefined, {
       onSuccess: ({ percentageSimilar }) => {
         toast({
@@ -97,17 +103,17 @@ const OpenEnded = ({ game }: Props) => {
         });
       },
     });
-  }, [checkAnswer, questionIndex, game.questions.length, toast, endGame]);
+  }, [checkAnswer, questionIndex, game.questions.length, toast, endGame, hasEnded]);
 
   const formatElapsedTime = (startTime: Date, currentTime: Date) => {
     const seconds = differenceInSeconds(currentTime, startTime);
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${hrs.toString().padStart(2, "0")}:${mins
-      .toString()
-      .padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    return `${hrs.toString().padStart(2, "0")}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
+
+
   React.useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       const key = event.key;
@@ -121,12 +127,12 @@ const OpenEnded = ({ game }: Props) => {
     };
   }, [handlePagination]);
 
-  // IF game is ended redirect to the statistics page
+  // If game has ended, redirect to the statistics page
   if (hasEnded) {
     return (
       <div className="absolute flex flex-col justify-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
         <div className="px-4 py-2 mt-2 font-semibold text-white dark:text-gray-600 bg-orange-400 rounded-md whitespace-nowrap">
-          You have Completed the Quiz in{" "}
+          You have completed the quiz in{" "}
           {formatTime(differenceInSeconds(now, game.timeStarted))}
         </div>
         <Link
@@ -159,7 +165,7 @@ const OpenEnded = ({ game }: Props) => {
           {mounted && formatElapsedTime(game.timeStarted, now)}
         </div>
         <div>
-          <OpenEndedPercentage percentage={averagePercentage} questionIndex={questionIndex}/>
+          <OpenEndedPercentage percentage={averagePercentage} questionIndex={questionIndex} />
         </div>
       </div>
       <Card className="w-full mt-4">
