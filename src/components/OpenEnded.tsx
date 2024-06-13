@@ -5,7 +5,7 @@ import { useToast } from "./ui/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { differenceInSeconds } from "date-fns";
 import { z } from "zod";
-import { checkAnswerSchema } from "@/schemas/forms/quiz";
+import { checkAnswerSchema, endGameSchema } from "@/schemas/forms/quiz";
 import axios from "axios";
 import { BarChart2, ChevronRight, Loader2, Slash, Timer } from "lucide-react";
 import { Button, buttonVariants } from "./ui/button";
@@ -46,7 +46,16 @@ const OpenEnded = ({ game }: Props) => {
   React.useEffect(() => {
     setMounted(true);
   }, []);
-
+  //End game logic
+  const {mutate: endGame} = useMutation({
+    mutationFn: async () => {
+      const payload : z.infer<typeof endGameSchema> = {
+        gameId: game.id,
+      }
+      const response = await axios.put(`/api/endGame`, payload);
+      return response.data;
+    }
+  })
   //  Passing current filled answer to store in the database
   const { mutate: checkAnswer, isPending: isChecking } = useMutation({
     mutationFn: async () => {
@@ -76,7 +85,7 @@ const OpenEnded = ({ game }: Props) => {
           return (prev + percentageSimilar) / (questionIndex + 1);
         });
         if (questionIndex === game.questions.length - 1) {
-          //End the game
+          endGame();
           setHasEnded(true);
           return;
         }
@@ -90,7 +99,7 @@ const OpenEnded = ({ game }: Props) => {
         });
       },
     });
-  }, [checkAnswer, questionIndex, game.questions.length, toast]);
+  }, [checkAnswer, questionIndex, game.questions.length, toast, endGame]);
 
   const formatElapsedTime = (startTime: Date, currentTime: Date) => {
     const seconds = differenceInSeconds(currentTime, startTime);
