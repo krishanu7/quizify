@@ -81,9 +81,7 @@ const OpenEnded = ({ game }: Props) => {
         toast({
           title: `Your answer is ${percentageSimilar}% similar to the correct answer`,
         });
-        setAveragePercentage((prev) => {
-          return (prev + percentageSimilar) / (questionIndex + 1);
-        });
+        setAveragePercentage((prev) => prev + percentageSimilar);
         if (questionIndex === game.questions.length - 1) {
           endGame();
           setHasEnded(true);
@@ -161,7 +159,7 @@ const OpenEnded = ({ game }: Props) => {
           {mounted && formatElapsedTime(game.timeStarted, now)}
         </div>
         <div>
-          <OpenEndedPercentage percentage={averagePercentage} />
+          <OpenEndedPercentage percentage={averagePercentage} questionIndex={questionIndex}/>
         </div>
       </div>
       <Card className="w-full mt-4">
