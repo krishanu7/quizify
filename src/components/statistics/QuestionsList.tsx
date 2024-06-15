@@ -17,7 +17,7 @@ type Props = {
 
 const QuestionsList = ({ questions }: Props) => {
   return (
-    <Table className="mt-4 w-full border-collapse border border-gray-200 shadow-sm dark:border-gray-700">
+    <Table className="mt-4 w-full shadow-lg dark:shadow-purple-300/60 rounded-lg overflow-hidden">
       <TableCaption className="p-4 text-gray-600 font-semibold dark:text-gray-400">
         End of list.
       </TableCaption>

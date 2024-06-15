@@ -191,7 +191,7 @@ const OpenEnded = ({ game }: Props) => {
           answer={currentQuestion.answer}
         />
         <Button
-          variant="default"
+          variant="submitB"
           className="mt-8 text-lg"
           size="lg"
           disabled={isChecking}

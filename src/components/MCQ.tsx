@@ -152,13 +152,13 @@ const MCQ = ({ game }: Props) => {
   if (hasEnded) {
     return (
       <div className="absolute flex flex-col justify-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2">
-        <div className="px-4 py-2 mt-2 font-semibold text-white dark:text-gray-600 bg-orange-400 rounded-md whitespace-nowrap">
+        <div className="px-4 py-2 mt-2 font-semibold text-white bg-orange-400 rounded-md whitespace-nowrap">
           You have Completed the Quiz in{" "}
           {formatTime(differenceInSeconds(now, game.timeStarted))}
         </div>
         <Link
           href={`/statistics/${game.id}`}
-          className={cn(buttonVariants({ size: "lg" }), "mt-2")}
+          className={cn(buttonVariants({ size: "lg" , variant: "submitB"}), "mt-2")}
         >
           View Statistics
           <BarChart2 className="w-4 h-4 ml-2" />
@@ -227,7 +227,7 @@ const MCQ = ({ game }: Props) => {
           );
         })}
         <Button
-          variant="default"
+          variant="submitB"
           className="mt-8 text-lg"
           size="lg"
           disabled={isChecking}

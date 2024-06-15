@@ -35,7 +35,7 @@ type Props = {
   topic: string;
 };
 
-const QuizCreation = ({topic: topicParam}: Props) => {
+const QuizCreation = ({ topic: topicParam }: Props) => {
   const router = useRouter();
   const { toast } = useToast();
   const [showLoader, setShowLoader] = React.useState(false);
@@ -82,25 +82,25 @@ const QuizCreation = ({topic: topicParam}: Props) => {
       },
     });
   };
-  
+
   form.watch();
 
   if (showLoader) {
     return <LoadingQuestions finished={finishedLoading} />;
   }
-  
+
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-      <Card className="dark:bg-gray-800 dark:shadow-lg dark:shadow-purple-500/60 dark:border dark:border-purple-500">
-        <CardHeader>
-          <CardTitle className="font-bold text-2xl text-center">
+      <Card className="col-span-4 hover:cursor-pointer hover:transition-transform hover:-translate-y-[3px] lg:col-span-3 bg-white border-l-0 border-t-0 dark:bg-gray-800 shadow-lg dark:hover:shadow-purple-300/60 rounded-lg overflow-hidden dark:border-b dark:border-r dark:border-purple-300">
+        <CardHeader className="bg-gray-100 dark:bg-gray-700">
+          <CardTitle className="font-bold text-2xl text-center text-gray-900 dark:text-gray-100">
             Quiz Creation
           </CardTitle>
-          <CardDescription className="text-center">
-            Choose any topic
+          <CardDescription className="text-center font-semibold mt-1 text-gray-700 dark:text-gray-300">
+            Choose any topic and conquer it.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="mt-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
@@ -110,9 +110,15 @@ const QuizCreation = ({topic: topicParam}: Props) => {
                   <FormItem>
                     <FormLabel>Topic</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter a topic..." {...field} />
+                      <Input
+                        placeholder="Enter a topic..."
+                        {...field}
+                        className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
+                      />
                     </FormControl>
-                    <FormDescription>Please provide a topic.</FormDescription>
+                    <FormDescription className="text-gray-600 dark:text-gray-400">
+                      Please provide a topic.
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -130,12 +136,13 @@ const QuizCreation = ({topic: topicParam}: Props) => {
                         min={1}
                         max={20}
                         {...field}
+                        className="border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                         onChange={(e) => {
                           form.setValue("amount", parseInt(e.target.value));
                         }}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-gray-600 dark:text-gray-400">
                       Please select number of questions.
                     </FormDescription>
                     <FormMessage />
@@ -149,7 +156,7 @@ const QuizCreation = ({topic: topicParam}: Props) => {
                     form.setValue("type", "mcq");
                   }}
                   variant={
-                    form.getValues("type") === "mcq" ? "default" : "secondary"
+                    form.getValues("type") === "mcq" ? "submitB" : "secondary"
                   }
                 >
                   <CopyCheck className="w-4 h-4 mr-2" /> Multiple Choice
@@ -161,7 +168,7 @@ const QuizCreation = ({topic: topicParam}: Props) => {
                   }}
                   variant={
                     form.getValues("type") === "open_ended"
-                      ? "default"
+                      ? "submitB"
                       : "secondary"
                   }
                 >
@@ -169,7 +176,12 @@ const QuizCreation = ({topic: topicParam}: Props) => {
                 </Button>
               </div>
 
-              <Button disabled={isPending} type="submit">
+              <Button
+                disabled={isPending}
+                type="submit"
+                variant="default"
+                className="bg-purple-500 hover:bg-purple-600 text-white dark:bg-purple-700 dark:hover:bg-purple-800"
+              >
                 Submit
               </Button>
             </form>

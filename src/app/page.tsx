@@ -13,20 +13,21 @@ export default async function Home() {
   const session = await getServerSession();
 
   if (session?.user) {
-    redirect('/dashboard');
+    redirect("/dashboard");
   }
   return (
     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
       <Card className="w-[300px]">
         <CardHeader>
-          <CardTitle>Welcome to Quizify 🔥</CardTitle>
+          <CardTitle>Welcome to BrainForge 🔥</CardTitle>
           <CardDescription>
-             Quizify is a platform for creating quizes using AI and Conquer yourself!. <br/>
-             Get started by loggin in below!
+            BrainForge is a platform for creating quizes using AI and Conquer
+            yourself!. <br />
+            Get started by loggin in below!
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignInButton text="Sign In with Google"/>
+          <SignInButton text="Sign In with Google" />
         </CardContent>
       </Card>
     </div>

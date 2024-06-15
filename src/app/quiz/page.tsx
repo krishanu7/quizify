@@ -8,7 +8,7 @@ type Props = {
 };
 
 export const metadata = {
-  title: "Quiz | Quizifi",
+  title: "Quiz | BrainForge",
 };
 
 const QuizPage = async ({ searchParams }: Props) => {
