@@ -6,5 +6,6 @@ RUN npm install autoprefixer --save
 COPY . .
 RUN npm run db:generate
 RUN npm run build
+
 EXPOSE 3000
 CMD [ "npm", "run", "start" ]
