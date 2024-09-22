@@ -19,6 +19,8 @@ jobs:
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env
           echo "API_URL=${{ secrets.API_URL }}" >> .env
+      - name: Clean up old images
+        run: docker image prune -f
       - name: Build docker image
         run: docker build -t krishanu7/brainfrodge .
       - name: Login to Docker Hub
